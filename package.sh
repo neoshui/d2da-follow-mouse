@@ -11,7 +11,7 @@ rm -f "$ZIP_NAME"
 
 cd "$SCRIPT_DIR"
 zip -r "$ZIP_NAME" \
-  extension.js metadata.json stylesheet.css install.sh README.md LICENSE schemas \
+  extension.js prefs.js metadata.json stylesheet.css install.sh README.md LICENSE schemas \
   -x 'dist/*'
 
 echo "Created: $ZIP_NAME"

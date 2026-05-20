@@ -12,7 +12,7 @@ install() {
     echo "==> Installing D2DA Follow Mouse..."
 
     mkdir -p "$EXT_DIR/schemas"
-    cp "$SCRIPT_DIR/extension.js" "$SCRIPT_DIR/metadata.json" "$SCRIPT_DIR/stylesheet.css" "$EXT_DIR/"
+    cp "$SCRIPT_DIR/extension.js" "$SCRIPT_DIR/prefs.js" "$SCRIPT_DIR/metadata.json" "$SCRIPT_DIR/stylesheet.css" "$EXT_DIR/"
     cp "$SCRIPT_DIR/schemas/org.gnome.shell.extensions.dash2dock-lite.gschema.xml" "$EXT_DIR/schemas/"
 
     if ! command -v glib-compile-schemas >/dev/null 2>&1; then

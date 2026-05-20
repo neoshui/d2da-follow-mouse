@@ -36,7 +36,20 @@ Smart dock switching for Dash2Dock Animated in multi-monitor setups: move your m
 
 ## 配置 / Configuration
 
-参数已经做成 GSettings 配置项，安装后可用下面命令调整：
+本分支已加入图形配置界面，可在 GNOME Extensions / Extension Manager 中点击本扩展的设置按钮打开。
+
+GUI 支持调整：
+
+- Multi-monitor preference：建议保持 `Single Dock`
+- Dock location：底部、左侧、右侧、顶部
+- Preferred monitor：当前 dock 显示器
+- Poll interval：鼠标轮询间隔
+- Edge dwell delay：边缘停留防抖时间
+- Trigger edge size：触发边缘宽度
+- Fast edge push speed：高速撞边立即切换阈值
+- Debug logs：调试日志开关
+
+也可以继续用 GSettings 命令调整：
 
 ```bash
 EXT_DIR="$HOME/.local/share/gnome-shell/extensions/d2da-follow-mouse@neoshui"
@@ -62,6 +75,7 @@ gsettings --schemadir "$EXT_DIR/schemas" set org.gnome.shell.extensions.dash2doc
 发布前建议将整个目录打包为 zip，确保包含：
 
 - `extension.js`
+- `prefs.js`
 - `metadata.json`
 - `stylesheet.css`
 - `schemas/org.gnome.shell.extensions.dash2dock-lite.gschema.xml`
