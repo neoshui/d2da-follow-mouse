@@ -1,0 +1,7 @@
+# Build artifacts
+*.zip
+dist/
+
+# IDE
+.idea/
+.vscode/
