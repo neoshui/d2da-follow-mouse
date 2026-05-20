@@ -1,14 +1,23 @@
-# D2DA Follow Mouse v1.0-rc7-position-switch-stable
+# D2DA Follow Mouse v1.0-rc8-gui
 
 Marked: 2026-05-20
 
-Status: stable after logout/re-login validation.
+Status: GUI preferences release.
 
-Validated behavior:
-- Dash2Dock Animated dock position switching works without restarting this extension.
-- Mouse edge trigger works across monitors after changing dock location.
-- Switching back to bottom still works across monitors.
+What changed:
+- Added GNOME Shell preferences UI
+- Exposed poll interval, debounce, edge size, fast push speed
+- Added dock location, preferred monitor, and multi-monitor preference controls
+- Preferences now open cleanly in GNOME Extensions / Extension Manager
+- Preferred monitor options now adapt to the current display session
 
-Key fix:
-- Runtime state sync no longer repeatedly resets pending state during polling.
-- Dock location changes reload runtime state and refresh monitor sampling safely.
+Validation:
+- prefs.js and extension.js syntax checked
+- metadata.json validated
+- schema compiled
+- package and install scripts verified
+- preferences window opens successfully
+
+Notes:
+- This release still targets Dash2Dock Animated-style dock control
+- Next branch will move toward direct GNOME Shell dock control without external dock dependency
