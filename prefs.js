@@ -5,6 +5,7 @@
  */
 
 import Adw from 'gi://Adw';
+import Gdk from 'gi://Gdk';
 import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
@@ -206,21 +207,39 @@ export default class D2DAFollowMousePreferences extends ExtensionPreferences {
     }
 
     _createPreferredMonitorRow() {
-        const monitorCount = this._safeGetInt('monitor-count', 1);
+        const count = this._getPreferredMonitorOptionCount();
         const model = new Gtk.StringList();
-        const count = Math.max(1, Math.min(monitorCount, 16));
 
         for (let i = 0; i < count; i++)
             model.append(`Monitor ${i}`);
 
         const row = new Adw.ComboRow({
             title: 'Preferred monitor',
-            subtitle: 'Current dock monitor. This also changes when the helper follows your mouse.',
+            subtitle: 'Current dock monitor. Options are detected from the current display session.',
             model,
         });
 
         this._bindComboRow(row, 'preferred-monitor', 0, model.get_n_items() - 1);
         return row;
+    }
+
+    _getPreferredMonitorOptionCount() {
+        const detectedCount = this._getDisplayMonitorCount();
+        const storedCount = this._safeGetInt('monitor-count', 1);
+        const preferredMonitor = this._safeGetInt('preferred-monitor', 0);
+
+        return Math.max(detectedCount, storedCount, preferredMonitor + 1, 2);
+    }
+
+    _getDisplayMonitorCount() {
+        try {
+            const display = Gdk.Display.get_default();
+            const monitors = display?.get_monitors?.();
+            const count = monitors?.get_n_items?.() ?? 0;
+            return Math.max(0, Math.min(count, 16));
+        } catch (_e) {
+            return 0;
+        }
     }
 
     _bindComboRow(row, key, min, max) {
