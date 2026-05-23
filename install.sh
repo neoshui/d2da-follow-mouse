@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
-# D2DA Follow Mouse — Install Script
+# Native Dock Follow Mouse — Install Script
 # Installs the extension with a local schema directory only.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-EXT_DIR="$HOME/.local/share/gnome-shell/extensions/d2da-follow-mouse@neoshui"
-UUID="d2da-follow-mouse@neoshui"
+EXT_DIR="$HOME/.local/share/gnome-shell/extensions/native-dock-follow-mouse@neoshui"
+UUID="native-dock-follow-mouse@neoshui"
+SCHEMA_FILE="org.gnome.shell.extensions.native-dock-follow-mouse.gschema.xml"
 
 install() {
-    echo "==> Installing D2DA Follow Mouse..."
+    echo "==> Installing Native Dock Follow Mouse..."
 
     rm -rf "$EXT_DIR"
     mkdir -p "$EXT_DIR/schemas"
     cp "$SCRIPT_DIR/extension.js" "$SCRIPT_DIR/prefs.js" "$SCRIPT_DIR/metadata.json" "$SCRIPT_DIR/stylesheet.css" "$EXT_DIR/"
-    cp "$SCRIPT_DIR/schemas/org.gnome.shell.extensions.dash2dock-lite.gschema.xml" "$EXT_DIR/schemas/"
+    cp "$SCRIPT_DIR/schemas/$SCHEMA_FILE" "$EXT_DIR/schemas/"
 
     if ! command -v glib-compile-schemas >/dev/null 2>&1; then
         echo "ERROR: glib-compile-schemas not found"
@@ -30,12 +31,12 @@ install() {
         echo "    Extension enabled"
     fi
 
-    echo "==> Done. Log out and back in to activate."
+    echo "==> Done. Log out and back in to activate cleanly."
     echo "    Status: gnome-extensions info $UUID"
 }
 
 uninstall() {
-    echo "==> Uninstalling D2DA Follow Mouse..."
+    echo "==> Uninstalling Native Dock Follow Mouse..."
 
     if command -v gnome-extensions >/dev/null 2>&1; then
         gnome-extensions disable "$UUID" >/dev/null 2>&1 || true

@@ -1,1 +1,5 @@
-/* Add your custom extension styling here */
+/* Native Dock Follow Mouse — override native Dash constraints */
+
+.native-dock-follow-mouse-dock {
+    margin: 0 !important;
+}

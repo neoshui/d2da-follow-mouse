@@ -1,9 +1,9 @@
 {
-  "name": "D2DA Follow Mouse",
-  "description": "让 Dash2Dock Animated 的 dock 在多显示器间智能跟随——鼠标触碰屏幕边缘时自动切换 dock 所在显示器。\n\nSmart dock switching for Dash2Dock Animated: dock follows your mouse across monitors and appears when you touch the screen edge.",
-  "uuid": "d2da-follow-mouse@neoshui",
-  "settings-schema": "org.gnome.shell.extensions.dash2dock-lite",
-  "url": "https://github.com/neoshui/d2da-follow-mouse",
-  "shell-version": ["46", "47", "48"],
-  "version": 4
+  "name": "Native Dock Follow Mouse",
+  "description": "Standalone GNOME Shell dock that follows the mouse across monitors. No Dash2Dock Animated, Dash to Dock, or Ubuntu Dock dependency.",
+  "uuid": "native-dock-follow-mouse@neoshui",
+  "settings-schema": "org.gnome.shell.extensions.native-dock-follow-mouse",
+  "url": "https://github.com/neoshui/native-dock-follow-mouse",
+  "shell-version": ["40", "41", "42", "43", "44", "45", "46", "47", "48"],
+  "version": 6
 }

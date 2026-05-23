@@ -1,6 +1,6 @@
 /* prefs.js
  *
- * Preferences UI for d2da-follow-mouse@neoshui.
+ * Preferences UI for Native Dock Follow Mouse.
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
@@ -10,9 +10,9 @@ import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-const D2DA_SCHEMA_ID = 'org.gnome.shell.extensions.dash2dock-lite';
+const SCHEMA_ID = 'org.gnome.shell.extensions.native-dock-follow-mouse';
 
-const CONFIG = {
+const SPIN_CONFIG = {
     pollMs: {
         key: 'follow-mouse-poll-ms',
         title: 'Poll interval',
@@ -49,14 +49,30 @@ const CONFIG = {
         step: 100,
         unit: ' px/s',
     },
+    iconSize: {
+        key: 'follow-mouse-icon-size',
+        title: 'Icon size',
+        subtitle: 'Native Dock icon size.',
+        min: 24,
+        max: 96,
+        step: 2,
+        unit: ' px',
+    },
 };
 
-export default class D2DAFollowMousePreferences extends ExtensionPreferences {
-    fillPreferencesWindow(window) {
-        window.set_title('D2DA Follow Mouse Configuration');
-        window.set_default_size(720, 560);
+const COLOR_CONFIG = {
+    key: 'active-dot-color',
+    title: 'Active dot color',
+    subtitle: 'Highlight color for the active application indicator dot.',
+    default: '#6ee7ff',
+};
 
-        this._settings = this._getD2DASettings();
+export default class NativeDockFollowMousePreferences extends ExtensionPreferences {
+    fillPreferencesWindow(window) {
+        window.set_title('Native Dock Follow Mouse Configuration');
+        window.set_default_size(720, 600);
+
+        this._settings = this.getSettings(SCHEMA_ID);
 
         const page = new Adw.PreferencesPage({
             title: 'Configuration',
@@ -66,28 +82,78 @@ export default class D2DAFollowMousePreferences extends ExtensionPreferences {
 
         const statusGroup = new Adw.PreferencesGroup({
             title: 'Status',
-            description: 'This helper controls Dash2Dock Animated by writing to its GSettings keys.',
+            description: 'Standalone GNOME Shell dock. No Dash2Dock Animated, Dash to Dock, or Ubuntu Dock dependency.',
         });
         page.add(statusGroup);
-
-        statusGroup.add(this._createInfoRow(
-            'Required Dash2Dock mode',
-            'Single Dock mode is required. Multi-monitor preference should be Single Dock.'
-        ));
-        statusGroup.add(this._createMultiMonitorRow());
+        statusGroup.add(this._createInfoRow('Backend', 'Pure GNOME Shell St actors + Shell.App favorites.'));
+        statusGroup.add(this._createDockModeRow());
         statusGroup.add(this._createDockLocationRow());
         statusGroup.add(this._createPreferredMonitorRow());
 
+        const appearanceGroup = new Adw.PreferencesGroup({
+            title: 'Appearance',
+            description: 'Basic Native Dock appearance.',
+        });
+        page.add(appearanceGroup);
+        appearanceGroup.add(this._createSpinRow(SPIN_CONFIG.iconSize));
+        appearanceGroup.add(this._createSpinRow({
+            key: 'dock-edge-margin',
+            title: 'Edge margin',
+            subtitle: 'Distance from the screen edge to the dock, in pixels. Negative values push the dock closer to the edge.',
+            min: -100,
+            max: 100,
+            step: 1,
+            unit: ' px',
+        }));
+        appearanceGroup.add(this._createSpinRow({
+            key: 'dock-icon-spacing',
+            title: 'Icon spacing',
+            subtitle: 'Gap between app icon containers in pixels. 0 = no extra gap.',
+            min: 0,
+            max: 50,
+            step: 1,
+            unit: ' px',
+        }));
+        appearanceGroup.add(this._createStringRow(COLOR_CONFIG));
+
         const tuningGroup = new Adw.PreferencesGroup({
             title: 'Follow Mouse Tuning',
-            description: 'Tune how quickly and how aggressively the dock follows your mouse across monitors.',
+            description: 'Used when Dock mode is “Single dock follows mouse”.',
         });
         page.add(tuningGroup);
+        tuningGroup.add(this._createSpinRow(SPIN_CONFIG.pollMs));
+        tuningGroup.add(this._createSpinRow(SPIN_CONFIG.debounceMs));
+        tuningGroup.add(this._createSpinRow(SPIN_CONFIG.edgePx));
+        tuningGroup.add(this._createSpinRow(SPIN_CONFIG.fastSpeed));
 
-        tuningGroup.add(this._createSpinRow(CONFIG.pollMs));
-        tuningGroup.add(this._createSpinRow(CONFIG.debounceMs));
-        tuningGroup.add(this._createSpinRow(CONFIG.edgePx));
-        tuningGroup.add(this._createSpinRow(CONFIG.fastSpeed));
+        const intellihideGroup = new Adw.PreferencesGroup({
+            title: 'Intellihide',
+            description: 'Automatically hide the dock when a maximized window overlaps it. Hover over the dock area to reveal it.',
+        });
+        page.add(intellihideGroup);
+        intellihideGroup.add(this._createSwitchRow({
+            key: 'intellihide-enabled',
+            title: 'Enable intellihide',
+            subtitle: 'Hide the dock when a maximized window is on the same monitor.',
+        }));
+        intellihideGroup.add(this._createSpinRow({
+            key: 'intellihide-hover-delay-ms',
+            title: 'Hover reveal delay',
+            subtitle: 'Delay before the dock appears when hovering over the dock area.',
+            min: 0,
+            max: 2000,
+            step: 50,
+            unit: ' ms',
+        }));
+        intellihideGroup.add(this._createSpinRow({
+            key: 'intellihide-hide-delay-ms',
+            title: 'Leave hide delay',
+            subtitle: 'Delay before the dock hides after the mouse leaves the dock area.',
+            min: 0,
+            max: 5000,
+            step: 100,
+            unit: ' ms',
+        }));
 
         const debugGroup = new Adw.PreferencesGroup({
             title: 'Debug',
@@ -97,26 +163,12 @@ export default class D2DAFollowMousePreferences extends ExtensionPreferences {
         debugGroup.add(this._createSwitchRow({
             key: 'follow-mouse-debug',
             title: 'Debug logs',
-            subtitle: 'Write verbose D2DA Follow Mouse logs to the GNOME Shell journal.',
+            subtitle: 'Write verbose Native Dock Follow Mouse logs to the GNOME Shell journal.',
         }));
 
         const actionsGroup = new Adw.PreferencesGroup({title: 'Actions'});
         page.add(actionsGroup);
         actionsGroup.add(this._createResetRow());
-    }
-
-    _getD2DASettings() {
-        const schemaDir = this.dir.get_child('schemas').get_path();
-        const schemaSource = Gio.SettingsSchemaSource.new_from_directory(
-            schemaDir,
-            Gio.SettingsSchemaSource.get_default(),
-            false
-        );
-        const schema = schemaSource.lookup(D2DA_SCHEMA_ID, true);
-        if (!schema)
-            throw new Error(`Settings schema not found: ${D2DA_SCHEMA_ID}`);
-
-        return new Gio.Settings({settings_schema: schema});
     }
 
     _createInfoRow(title, subtitle) {
@@ -167,25 +219,54 @@ export default class D2DAFollowMousePreferences extends ExtensionPreferences {
         return row;
     }
 
+    _createStringRow(config) {
+        const row = new Adw.ActionRow({
+            title: config.title,
+            subtitle: config.subtitle,
+        });
+
+        const entry = new Gtk.Entry({
+            text: this._settings.get_string(config.key) || config.default || '',
+            valign: Gtk.Align.CENTER,
+            width_chars: 12,
+        });
+
+        entry.connect('changed', () => {
+            const value = entry.get_text().trim();
+            if (value && this._settings.get_string(config.key) !== value)
+                this._settings.set_string(config.key, value);
+        });
+
+        this._settings.connect(`changed::${config.key}`, () => {
+            const value = this._settings.get_string(config.key) || config.default || '';
+            if (entry.get_text() !== value)
+                entry.set_text(value);
+        });
+
+        row.add_suffix(entry);
+        row.activatable_widget = entry;
+        return row;
+    }
+
     _createSwitchRow({key, title, subtitle}) {
         const row = new Adw.SwitchRow({title, subtitle});
         this._settings.bind(key, row, 'active', Gio.SettingsBindFlags.DEFAULT);
         return row;
     }
 
-    _createMultiMonitorRow() {
+    _createDockModeRow() {
         const model = new Gtk.StringList();
-        model.append('Single Dock');
-        model.append('All Monitors');
-        model.append('Primary Monitor');
+        model.append('Single dock follows mouse');
+        model.append('Dock on every monitor');
+        model.append('Primary monitor only');
 
         const row = new Adw.ComboRow({
-            title: 'Multi-monitor preference',
-            subtitle: 'Keep this set to Single Dock for follow-mouse switching.',
+            title: 'Dock mode',
+            subtitle: 'Controls dock quantity and follow behavior.',
             model,
         });
 
-        this._bindComboRow(row, 'multi-monitor-preference', 0, model.get_n_items() - 1);
+        this._bindComboRow(row, 'dock-mode', 0, model.get_n_items() - 1);
         return row;
     }
 
@@ -198,7 +279,7 @@ export default class D2DAFollowMousePreferences extends ExtensionPreferences {
 
         const row = new Adw.ComboRow({
             title: 'Dock location',
-            subtitle: 'Trigger edge follows this Dash2Dock Animated dock position.',
+            subtitle: 'Screen edge used for dock placement and mouse trigger.',
             model,
         });
 
@@ -215,7 +296,7 @@ export default class D2DAFollowMousePreferences extends ExtensionPreferences {
 
         const row = new Adw.ComboRow({
             title: 'Preferred monitor',
-            subtitle: 'Current dock monitor. Options are detected from the current display session.',
+            subtitle: 'Initial monitor for the single follow-mouse dock.',
             model,
         });
 
@@ -227,6 +308,9 @@ export default class D2DAFollowMousePreferences extends ExtensionPreferences {
         const detectedCount = this._getDisplayMonitorCount();
         const storedCount = this._safeGetInt('monitor-count', 1);
         const preferredMonitor = this._safeGetInt('preferred-monitor', 0);
+
+        if (detectedCount > 0 && this._settings.get_int('monitor-count') !== detectedCount)
+            this._settings.set_int('monitor-count', detectedCount);
 
         return Math.max(detectedCount, storedCount, preferredMonitor + 1, 2);
     }
@@ -262,8 +346,8 @@ export default class D2DAFollowMousePreferences extends ExtensionPreferences {
 
     _createResetRow() {
         const row = new Adw.ActionRow({
-            title: 'Reset follow-mouse settings',
-            subtitle: 'Restore poll interval, debounce delay, edge size, fast push speed, and debug logs to defaults.',
+            title: 'Reset Native Dock settings',
+            subtitle: 'Restore Native Dock Follow Mouse settings to defaults.',
         });
 
         const button = new Gtk.Button({
@@ -271,15 +355,35 @@ export default class D2DAFollowMousePreferences extends ExtensionPreferences {
             valign: Gtk.Align.CENTER,
             css_classes: ['destructive-action'],
         });
-        button.connect('clicked', () => {
-            for (const config of Object.values(CONFIG))
-                this._settings.reset(config.key);
-            this._settings.reset('follow-mouse-debug');
-        });
-
+        button.connect('clicked', () => this._resetSettings());
         row.add_suffix(button);
         row.activatable_widget = button;
         return row;
+    }
+
+    _resetSettings() {
+        const keys = [
+            'dock-mode',
+            'dock-location',
+            'preferred-monitor',
+            'monitor-count',
+            'follow-mouse-poll-ms',
+            'follow-mouse-debounce-ms',
+            'follow-mouse-edge-px',
+            'follow-mouse-fast-speed',
+            'follow-mouse-icon-size',
+            'show-apps-icon',
+            'active-dot-color',
+            'follow-mouse-debug',
+            'intellihide-enabled',
+            'intellihide-hover-delay-ms',
+            'intellihide-hide-delay-ms',
+            'dock-edge-margin',
+            'dock-icon-spacing',
+        ];
+
+        for (const key of keys)
+            this._settings.reset(key);
     }
 
     _safeGetInt(key, fallback) {

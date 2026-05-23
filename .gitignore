@@ -1,6 +1,7 @@
 # Build artifacts
 *.zip
 dist/
+.build-version
 
 # IDE
 .idea/
